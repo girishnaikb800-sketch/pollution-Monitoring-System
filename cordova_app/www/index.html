@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoPulse - Smart Environmental Pollution Monitoring Dashboard</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="img/logo.png">
+
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Core Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Chart.js & Leaflet JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="dashboard-body">
+
+    <!-- Main Desktop Layout Shell -->
+    <div class="web-layout">
+
+        <!-- 1. LEFT SIDEBAR NAVIGATION -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo-wrap">
+                    <img src="img/logo.png" alt="EcoPulse Logo" class="brand-logo" />
+                    <div class="brand-text">
+                        <span class="brand-name">EcoPulse</span>
+                        <span class="brand-tagline">Pollution Guard</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle-btn" id="sidebarToggle" onclick="toggleSidebar()" title="Toggle Sidebar">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">MONITORING</div>
+                <button class="nav-item active" onclick="switchScreen('Dashboard', this)">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Overview Dashboard</span>
+                </button>
+                <button class="nav-item" onclick="switchScreen('Map', this)">
+                    <i class="fas fa-map-location-dot"></i>
+                    <span>Live Pollution Map</span>
+                    <span class="nav-pill live">Live</span>
+                </button>
+                <button class="nav-item" onclick="switchScreen('History', this)">
+                    <i class="fas fa-chart-line"></i>
+                    <span>History &amp; Analytics</span>
+                </button>
+                <button class="nav-item" onclick="switchScreen('Alerts', this)">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    <span>Alerts &amp; Warnings</span>
+                    <span class="nav-pill badge-alert" id="sidebarAlertCount">3</span>
+                </button>
+
+                <div class="nav-section-label">DATA &amp; IOT</div>
+                <button class="nav-item" onclick="switchScreen('Admin', this)">
+                    <i class="fas fa-microchip"></i>
+                    <span>Admin &amp; IoT Devices</span>
+                    <span class="nav-pill live" id="navDeviceCount">2 Online</span>
+                </button>
+                <button class="nav-item" onclick="switchScreen('Provider', this)">
+                    <i class="fas fa-satellite-dish"></i>
+                    <span>Satellite Provider</span>
+                    <span class="nav-pill live">Open-Meteo</span>
+                </button>
+                <button class="nav-item" onclick="switchScreen('Profile', this)">
+                    <i class="fas fa-server"></i>
+                    <span>System &amp; Cloud Hub</span>
+                </button>
+            </nav>
+
+            <!-- Bottom System Status Card -->
+            <div class="sidebar-footer">
+                <div class="system-status-card">
+                    <div class="status-indicator">
+                        <span class="pulse-dot"></span>
+                        <span class="status-text">IoT Station Online</span>
+                    </div>
+                    <div class="status-details">
+                        <span>Dual Cloud DB: Active</span>
+                        <span id="sidebarIpDisplay">10.129.199.144:8000</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 2. MAIN CONTENT AREA -->
+        <div class="main-wrapper">
+
+            <!-- Top Header App Bar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="header-greeting-block">
+                        <h2 class="page-title" id="pageTitle">Environmental Dashboard</h2>
+                        <span class="page-subtitle" id="topbarSubtitle">Live telemetry across Bangalore Station &amp; Satellite Network</span>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <!-- Location Badge -->
+                    <div class="topbar-chip location-chip" onclick="switchScreen('Map')" title="Current Monitoring Location">
+                        <i class="fas fa-location-dot"></i>
+                        <span id="topbarLocationText">Bangalore, IN</span>
+                    </div>
+
+                    <!-- AQI Status Pill -->
+                    <div class="topbar-chip aqi-pill-good" id="topbarAqiPill">
+                        <i class="fas fa-leaf"></i>
+                        <span id="topbarAqiText">AQI 42 • Good</span>
+                    </div>
+
+                    <!-- Neon Cloud DB Real-Time Storage Chip -->
+                    <div class="topbar-chip neon-cloud-chip" id="topbarNeonChip" onclick="switchScreen('Admin')" title="Neon PostgreSQL Serverless Cloud (AWS Singapore)">
+                        <span class="neon-chip-dot"></span>
+                        <span id="topbarNeonText">Neon Cloud: Storing Live ☁️</span>
+                    </div>
+
+                    <!-- Quick Sync Satellite Button -->
+                    <button class="btn-topbar-action" onclick="syncLiveProvider()" title="Sync Open-Meteo Satellite Data">
+                        <i class="fas fa-satellite-dish"></i>
+                        <span class="btn-label">Sync Satellite</span>
+                    </button>
+
+                    <!-- Refresh Button -->
+                    <button class="btn-icon-topbar" onclick="pollLatestReading()" title="Refresh Telemetry">
+                        <i class="fas fa-rotate" id="syncIcon"></i>
+                    </button>
+
+                    <!-- Alerts Bell -->
+                    <button class="btn-icon-topbar" onclick="switchScreen('Alerts')" title="View Alerts">
+                        <i class="fas fa-bell"></i>
+                        <span class="topbar-badge" id="topbarAlertBadge">3</span>
+                    </button>
+
+                    <!-- User Profile Avatar -->
+                    <div class="user-profile-badge" onclick="switchScreen('Profile')">
+                        <img src="img/logo.png" alt="User Avatar" class="user-avatar-img" />
+                        <div class="user-meta">
+                            <span class="user-name">Girish Naik</span>
+                            <span class="user-role">Admin</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Scrollable Content Canvas -->
+            <main class="content-canvas">
+
+                <!-- ============================================== -->
+                <!-- SCREEN 1: MAIN OVERVIEW DASHBOARD              -->
+                <!-- ============================================== -->
+                <section class="screen-view active" id="screenDashboard">
+                    
+                    <!-- Real-Time Cloud Storage & Data Pipeline Banner -->
+                    <div class="cloud-storage-banner" id="cloudStorageBanner">
+                        <div class="banner-left">
+                            <div class="cloud-icon-pulse"><i class="fas fa-database"></i></div>
+                            <div class="banner-info">
+                                <span class="banner-title">Active Database: <strong>Neon PostgreSQL Serverless Cloud (AWS Singapore)</strong></span>
+                                <span class="banner-sub">Dual-Write Active • SSL: TLS 1.3 • Latency: <strong id="bannerNeonLatency">~14 ms</strong></span>
+                            </div>
+                        </div>
+                        <div class="banner-right">
+                            <div class="live-storage-badge" id="bannerLiveBadge">
+                                <span class="pulse-dot"></span>
+                                <span>STORING IN REAL-TIME</span>
+                            </div>
+                            <span class="stored-count-tag" id="bannerTotalRecords">601+ Readings Saved</span>
+                            <button class="btn-banner-action" onclick="switchScreen('Admin')">
+                                <i class="fas fa-microchip"></i> Admin &amp; IoT Nodes
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Row 1: 5 Core Parameter Metric Cards -->
+                    <div class="metric-ribbon-grid">
+                        
+                        <!-- Metric 1: Total AQI Card -->
+                        <div class="card metric-hero-card">
+                            <div class="hero-gauge-container">
+                                <div class="circular-gauge-wrapper">
+                                    <svg viewBox="0 0 120 120" class="gauge-svg">
+                                        <circle class="gauge-track" cx="60" cy="60" r="50"></circle>
+                                        <circle class="gauge-fill" id="gaugeFillCircle" cx="60" cy="60" r="50"></circle>
+                                    </svg>
+                                    <div class="gauge-center-text">
+                                        <span class="gauge-value" id="valAqi">42</span>
+                                        <span class="gauge-label">AQI</span>
+                                    </div>
+                                </div>
+                                <div class="hero-gauge-info">
+                                    <span class="metric-card-label">AIR QUALITY INDEX</span>
+                                    <div class="aqi-status-badge" id="lblAqiCategory">Good (Safe)</div>
+                                    <p class="aqi-desc-text">Optimal air quality. Ideal conditions for outdoor activities.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Metric 2: Carbon Dioxide (CO2) -->
+                        <div class="card metric-tile">
+                            <div class="metric-tile-header">
+                                <div class="icon-box icon-co2"><i class="fas fa-wind"></i></div>
+                                <span class="status-indicator-dot dot-green" id="dotCO2"></span>
+                            </div>
+                            <div class="metric-tile-body">
+                                <span class="metric-tile-label">Carbon Dioxide (CO₂)</span>
+                                <div class="metric-tile-number">
+                                    <span class="num-val" id="valCO2">421</span>
+                                    <span class="num-unit">ppm</span>
+                                </div>
+                                <div class="metric-progress-bar">
+                                    <div class="metric-progress-fill bg-green" id="barCO2" style="width: 25%;"></div>
+                                </div>
+                                <span class="metric-tile-caption">Normal Atmospheric Range</span>
+                            </div>
+                        </div>
+
+                        <!-- Metric 3: Carbon Monoxide (CO) -->
+                        <div class="card metric-tile">
+                            <div class="metric-tile-header">
+                                <div class="icon-box icon-co"><i class="fas fa-smog"></i></div>
+                                <span class="status-indicator-dot dot-green" id="dotCO"></span>
+                            </div>
+                            <div class="metric-tile-body">
+                                <span class="metric-tile-label">Carbon Monoxide (CO)</span>
+                                <div class="metric-tile-number">
+                                    <span class="num-val" id="valCO">0.8</span>
+                                    <span class="num-unit">ppm</span>
+                                </div>
+                                <div class="metric-progress-bar">
+                                    <div class="metric-progress-fill bg-green" id="barCO" style="width: 15%;"></div>
+                                </div>
+                                <span class="metric-tile-caption">Safe &amp; Non-Hazardous</span>
+                            </div>
+                        </div>
+
+                        <!-- Metric 4: Ambient Temperature -->
+                        <div class="card metric-tile">
+                            <div class="metric-tile-header">
+                                <div class="icon-box icon-temp"><i class="fas fa-temperature-three-quarters"></i></div>
+                                <span class="badge-chip">Ambient</span>
+                            </div>
+                            <div class="metric-tile-body">
+                                <span class="metric-tile-label">Temperature</span>
+                                <div class="metric-tile-number">
+                                    <span class="num-val" id="valTemp">28.5</span>
+                                    <span class="num-unit">°C</span>
+                                </div>
+                                <div class="metric-progress-bar">
+                                    <div class="metric-progress-fill bg-orange" id="barTemp" style="width: 58%;"></div>
+                                </div>
+                                <span class="metric-tile-caption">Comfortable Environment</span>
+                            </div>
+                        </div>
+
+                        <!-- Metric 5: Relative Humidity -->
+                        <div class="card metric-tile">
+                            <div class="metric-tile-header">
+                                <div class="icon-box icon-hum"><i class="fas fa-droplet"></i></div>
+                                <span class="badge-chip">Relative</span>
+                            </div>
+                            <div class="metric-tile-body">
+                                <span class="metric-tile-label">Humidity</span>
+                                <div class="metric-tile-number">
+                                    <span class="num-val" id="valHum">62</span>
+                                    <span class="num-unit">%</span>
+                                </div>
+                                <div class="metric-progress-bar">
+                                    <div class="metric-progress-fill bg-blue" id="barHum" style="width: 62%;"></div>
+                                </div>
+                                <span class="metric-tile-caption">Optimal Moisture Balance</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Row 2: Live Multi-Parameter Chart & Health Insights Grid -->
+                    <div class="dashboard-split-grid">
+                        
+                        <!-- Left: Real-Time Multi-Parameter Trend Chart -->
+                        <div class="card chart-panel-large">
+                            <div class="panel-header-row">
+                                <div>
+                                    <h3 class="panel-title"><i class="fas fa-chart-area text-green"></i> Live Environmental Telemetry (24-Hour Trend)</h3>
+                                    <span class="panel-subtitle">Real-time synchronized sensor stream with 5 core parameters</span>
+                                </div>
+                                <div class="chart-toggles">
+                                    <button class="toggle-pill active" onclick="setTrendDataset('ALL', this)">All</button>
+                                    <button class="toggle-pill" onclick="setTrendDataset('AQI', this)">AQI</button>
+                                    <button class="toggle-pill" onclick="setTrendDataset('CO2', this)">CO₂</button>
+                                    <button class="toggle-pill" onclick="setTrendDataset('CO', this)">CO</button>
+                                    <button class="toggle-pill" onclick="setTrendDataset('CLIMATE', this)">Temp / Hum</button>
+                                </div>
+                            </div>
+                            <div class="canvas-holder-large">
+                                <canvas id="chartOverview24h"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Right: Health Advisory & Mini-Map -->
+                        <div class="dashboard-sidebar-column">
+                            
+                            <!-- Health Advisory Card -->
+                            <div class="card health-advisory-card">
+                                <div class="advisory-header">
+                                    <i class="fas fa-heart-pulse text-green"></i>
+                                    <h4>Health &amp; Activity Advisory</h4>
+                                </div>
+                                <div class="advisory-items">
+                                    <div class="advisory-item">
+                                        <div class="advisory-icon bg-green-light"><i class="fas fa-person-running text-green"></i></div>
+                                        <div class="advisory-content">
+                                            <strong>Outdoor Activities</strong>
+                                            <p id="advOutdoor">Safe for jogging, cycling, and sports.</p>
+                                        </div>
+                                    </div>
+                                    <div class="advisory-item">
+                                        <div class="advisory-icon bg-blue-light"><i class="fas fa-door-open text-blue"></i></div>
+                                        <div class="advisory-content">
+                                            <strong>Indoor Ventilation</strong>
+                                            <p id="advVent">Keep windows open for fresh airflow.</p>
+                                        </div>
+                                    </div>
+                                    <div class="advisory-item">
+                                        <div class="advisory-icon bg-orange-light"><i class="fas fa-shield-virus text-orange"></i></div>
+                                        <div class="advisory-content">
+                                            <strong>Sensitive Groups</strong>
+                                            <p id="advSensitive">No restrictions or precautions required.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mini Live Map Card -->
+                            <div class="card mini-map-card" onclick="switchScreen('Map')" title="Click to Expand Full Interactive Map">
+                                <div class="mini-map-header">
+                                    <span><i class="fas fa-map-pin text-green"></i> Live Station Map</span>
+                                    <span class="text-link">Full Map <i class="fas fa-arrow-right"></i></span>
+                                </div>
+                                <div class="mini-map-container" id="miniMap"></div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </section>
+
+                <!-- ============================================== -->
+                <!-- SCREEN 2: LIVE POLLUTION MAP SCREEN            -->
+                <!-- ============================================== -->
+                <section class="screen-view" id="screenMap">
+                    <div class="map-layout-box">
+                        
+                        <!-- Map Control Toolbar -->
+                        <div class="map-control-bar card">
+                            <div class="map-search-group">
+                                <i class="fas fa-magnifying-glass"></i>
+                                <input type="text" id="mapSearchInput" placeholder="Search city, neighborhood, or station..." onkeydown="if(event.key==='Enter') searchMapLocation()" />
+                                <button class="btn-map-search" onclick="searchMapLocation()">Search</button>
+                            </div>
+
+                            <div class="map-filter-group">
+                                <span class="filter-label">Filter Layer:</span>
+                                <button class="map-layer-btn active" onclick="setMapLayerFilter('AQI', this)">Total AQI</button>
+                                <button class="map-layer-btn" onclick="setMapLayerFilter('CO', this)">Carbon Monoxide (CO)</button>
+                                <button class="map-layer-btn" onclick="setMapLayerFilter('CO2', this)">Carbon Dioxide (CO₂)</button>
+                            </div>
+
+                            <button class="btn-gps-locate" onclick="centerUserLocation()" title="Locate My GPS Coordinates">
+                                <i class="fas fa-location-crosshairs"></i> My Location
+                            </button>
+                        </div>
+
+                        <!-- Full Leaflet Map View -->
+                        <div class="leaflet-full-container">
+                            <div id="leafletMap"></div>
+
+                            <!-- Floating Station Info Bottom Sheet -->
+                            <div class="floating-station-panel card" id="stationFloatingPanel">
+                                <div class="floating-panel-top">
+                                    <div class="station-avatar"><i class="fas fa-tower-broadcast text-green"></i></div>
+                                    <div class="station-meta">
+                                        <h4 id="stationSheetName">Bangalore Central Station</h4>
+                                        <span class="station-distance" id="stationSheetDist">Live IoT Sensor Node (0.0 km)</span>
+                                    </div>
+                                    <button class="btn-close-floating" onclick="document.getElementById('stationFloatingPanel').classList.toggle('minimized')">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                                <div class="floating-panel-metrics">
+                                    <div class="panel-metric-col">
+                                        <span class="pm-val text-green" id="sheetValAQI">42 (Good)</span>
+                                        <span class="pm-lbl">Total AQI</span>
+                                    </div>
+                                    <div class="panel-metric-col">
+                                        <span class="pm-val text-orange" id="sheetValCO">0.8 ppm</span>
+                                        <span class="pm-lbl">Carbon Monoxide</span>
+                                    </div>
+                                    <div class="panel-metric-col">
+                                        <span class="pm-val text-blue" id="sheetValCO2">421 ppm</span>
+                                        <span class="pm-lbl">Carbon Dioxide</span>
+                                    </div>
+                                    <div class="panel-metric-col">
+                                        <span class="pm-val text-dark" id="sheetValClimate">28.5°C / 62%</span>
+                                        <span class="pm-lbl">Temp &amp; Humidity</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- ============================================== -->
+                <!-- SCREEN 3: HISTORY & ANALYTICS                  -->
+                <!-- ============================================== -->
+                <section class="screen-view" id="screenHistory">
+                    
+                    <!-- History Controls Ribbon -->
+                    <div class="card history-filter-ribbon">
+                        <div class="filter-ribbon-left">
+                            <div class="date-picker-box" onclick="openDatePicker()" title="Select Date Filter (Future Dates Blocked)">
+                                <i class="fas fa-calendar-days text-green"></i>
+                                <span id="lblDateRange">15 Sep 2026 - 21 Sep 2026</span>
+                                <input type="date" id="hiddenDatePicker" onchange="onDateSelected(this.value)" />
+                                <i class="fas fa-chevron-down text-muted"></i>
+                            </div>
+
+                            <div class="interval-selector">
+                                <button class="interval-btn active" onclick="switchHistRange('Daily', this)">Daily</button>
+                                <button class="interval-btn" onclick="switchHistRange('Weekly', this)">Weekly</button>
+                                <button class="interval-btn" onclick="switchHistRange('Monthly', this)">Monthly</button>
+                            </div>
+                        </div>
+
+                        <div class="filter-ribbon-right">
+                            <button class="btn-export-action" onclick="exportCSVReport()">
+                                <i class="fas fa-file-csv"></i> Export CSV
+                            </button>
+                            <button class="btn-export-action primary" onclick="exportReport()">
+                                <i class="fas fa-download"></i> Download PDF Report
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- History KPI Summary Cards -->
+                    <div class="history-kpi-grid">
+                        <div class="card kpi-card">
+                            <span class="kpi-label">Peak Pollution Level</span>
+                            <h3 class="kpi-val text-red" id="valHistPeak">121</h3>
+                            <span class="kpi-badge badge-red">Unhealthy Spike</span>
+                        </div>
+                        <div class="card kpi-card">
+                            <span class="kpi-label">Average 7-Day AQI</span>
+                            <h3 class="kpi-val text-green" id="valHistAvg">48</h3>
+                            <span class="kpi-badge badge-green">Good Air Quality</span>
+                        </div>
+                        <div class="card kpi-card">
+                            <span class="kpi-label">Average CO₂ Concentration</span>
+                            <h3 class="kpi-val text-blue" id="valHistCO2Avg">435 ppm</h3>
+                            <span class="kpi-badge badge-blue">Normal Ventilation</span>
+                        </div>
+                        <div class="card kpi-card">
+                            <span class="kpi-label">Mean Ambient Climate</span>
+                            <h3 class="kpi-val text-orange" id="valHistClimateAvg">28.2°C • 61%</h3>
+                            <span class="kpi-badge badge-orange">Tropical Normal</span>
+                        </div>
+                    </div>
+
+                    <!-- 5 Full Independent Analytics Charts Grid -->
+                    <div class="analytics-charts-grid">
+                        
+                        <!-- Chart 1: Total AQI Trend -->
+                        <div class="card chart-box-card">
+                            <div class="chart-header">
+                                <div>
+                                    <h5><i class="fas fa-leaf text-green"></i> Total Air Quality Index (AQI Trend)</h5>
+                                    <span class="chart-sub">EPA Breakpoint standard (Good: 0-50, Moderate: 51-100)</span>
+                                </div>
+                                <span class="chart-avg-badge bg-green-light text-green">Avg: 48 (Good)</span>
+                            </div>
+                            <div class="chart-canvas-wrapper">
+                                <canvas id="chartAQI"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Chart 2: Carbon Monoxide (CO) -->
+                        <div class="card chart-box-card">
+                            <div class="chart-header">
+                                <div>
+                                    <h5><i class="fas fa-smog text-orange"></i> Carbon Monoxide (CO Levels)</h5>
+                                    <span class="chart-sub">Concentration measured in parts per million (ppm)</span>
+                                </div>
+                                <span class="chart-avg-badge bg-orange-light text-orange">Max: 2.8 ppm</span>
+                            </div>
+                            <div class="chart-canvas-wrapper">
+                                <canvas id="chartCO"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Chart 3: Carbon Dioxide (CO2) -->
+                        <div class="card chart-box-card">
+                            <div class="chart-header">
+                                <div>
+                                    <h5><i class="fas fa-wind text-blue"></i> Carbon Dioxide (CO₂ Concentration)</h5>
+                                    <span class="chart-sub">Indoor/Outdoor atmospheric concentration in ppm</span>
+                                </div>
+                                <span class="chart-avg-badge bg-blue-light text-blue">Avg: 440 ppm</span>
+                            </div>
+                            <div class="chart-canvas-wrapper">
+                                <canvas id="chartCO2"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Chart 4: Temperature Trend -->
+                        <div class="card chart-box-card">
+                            <div class="chart-header">
+                                <div>
+                                    <h5><i class="fas fa-temperature-high text-orange"></i> Ambient Temperature Trend</h5>
+                                    <span class="chart-sub">Thermal variance logged in degrees Celsius (°C)</span>
+                                </div>
+                                <span class="chart-avg-badge bg-orange-light text-orange">Avg: 28.5 °C</span>
+                            </div>
+                            <div class="chart-canvas-wrapper">
+                                <canvas id="chartTemp"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Chart 5: Relative Humidity -->
+                        <div class="card chart-box-card">
+                            <div class="chart-header">
+                                <div>
+                                    <h5><i class="fas fa-droplet text-blue"></i> Relative Humidity Trend</h5>
+                                    <span class="chart-sub">Moisture percentage (%) telemetry</span>
+                                </div>
+                                <span class="chart-avg-badge bg-blue-light text-blue">Avg: 62 %</span>
+                            </div>
+                            <div class="chart-canvas-wrapper">
+                                <canvas id="chartHum"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <!-- ============================================== -->
+                <!-- SCREEN 4: ALERTS & DIAGNOSTICS                 -->
+                <!-- ============================================== -->
+                <section class="screen-view" id="screenAlerts">
+                    <div class="alerts-layout-grid">
+                        
+                        <!-- Left: Live Alert Stream -->
+                        <div class="card alerts-stream-panel">
+                            <div class="panel-header-row">
+                                <div>
+                                    <h3 class="panel-title"><i class="fas fa-bell text-orange"></i> System &amp; Environmental Alerts</h3>
+                                    <span class="panel-subtitle">Real-time threshold violation logs and safety triggers</span>
+                                </div>
+                                <div class="alert-category-filters">
+                                    <button class="alert-filter active" onclick="filterAlerts('All', this)">All</button>
+                                    <button class="alert-filter" onclick="filterAlerts('Air Quality', this)">Air Quality</button>
+                                    <button class="alert-filter" onclick="filterAlerts('Sensor', this)">Sensor</button>
+                                    <button class="alert-filter" onclick="filterAlerts('System', this)">System</button>
+                                </div>
+                            </div>
+
+                            <div class="alerts-list" id="alertsListContainer">
+                                
+                                <div class="alert-card border-orange" data-cat="Air Quality">
+                                    <div class="alert-card-icon bg-orange"><i class="fas fa-triangle-exclamation"></i></div>
+                                    <div class="alert-card-content">
+                                        <div class="alert-card-header">
+                                            <h5>Elevated Carbon Monoxide (CO) Spike</h5>
+                                            <span class="alert-timestamp">2 mins ago</span>
+                                        </div>
+                                        <p>Carbon Monoxide level touched 3.2 ppm near the sensor node. Standard ventilation maintained.</p>
+                                        <div class="alert-footer-tags">
+                                            <span class="alert-badge badge-orange">Medium Warning</span>
+                                            <span class="alert-tag">CO Sensor</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn-dismiss-alert" onclick="this.parentElement.remove()"><i class="fas fa-xmark"></i></button>
+                                </div>
+
+                                <div class="alert-card border-blue" data-cat="Air Quality">
+                                    <div class="alert-card-icon bg-blue"><i class="fas fa-wind"></i></div>
+                                    <div class="alert-card-content">
+                                        <div class="alert-card-header">
+                                            <h5>Carbon Dioxide (CO₂) Advisory</h5>
+                                            <span class="alert-timestamp">18 mins ago</span>
+                                        </div>
+                                        <p>Indoor CO₂ level exceeded 650 ppm. Recommended opening fresh air circulation.</p>
+                                        <div class="alert-footer-tags">
+                                            <span class="alert-badge badge-blue">Advisory</span>
+                                            <span class="alert-tag">MQ-135 Sensor</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn-dismiss-alert" onclick="this.parentElement.remove()"><i class="fas fa-xmark"></i></button>
+                                </div>
+
+                                <div class="alert-card border-green" data-cat="System">
+                                    <div class="alert-card-icon bg-green"><i class="fas fa-circle-check"></i></div>
+                                    <div class="alert-card-content">
+                                        <div class="alert-card-header">
+                                            <h5>Open-Meteo Satellite Provider Synced</h5>
+                                            <span class="alert-timestamp">35 mins ago</span>
+                                        </div>
+                                        <p>Global meteorological satellite telemetry synchronized successfully for coordinates (12.9716, 77.5946).</p>
+                                        <div class="alert-footer-tags">
+                                            <span class="alert-badge badge-green">Healthy</span>
+                                            <span class="alert-tag">Open-Meteo API</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn-dismiss-alert" onclick="this.parentElement.remove()"><i class="fas fa-xmark"></i></button>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Right: Threshold Customizer -->
+                        <div class="card threshold-settings-panel">
+                            <h4 class="panel-title"><i class="fas fa-sliders text-green"></i> Custom Alert Thresholds</h4>
+                            <p class="panel-subtitle">Configure notification triggers for environmental parameters</p>
+
+                            <div class="threshold-sliders">
+                                <div class="slider-item">
+                                    <div class="slider-header">
+                                        <span>AQI Warning Limit</span>
+                                        <strong id="valThresholdAqi">100 AQI</strong>
+                                    </div>
+                                    <input type="range" min="50" max="300" value="100" class="range-slider" oninput="document.getElementById('valThresholdAqi').textContent=this.value + ' AQI'" />
+                                </div>
+
+                                <div class="slider-item">
+                                    <div class="slider-header">
+                                        <span>Carbon Monoxide (CO) Limit</span>
+                                        <strong id="valThresholdCO">4.5 ppm</strong>
+                                    </div>
+                                    <input type="range" min="1" max="15" step="0.5" value="4.5" class="range-slider" oninput="document.getElementById('valThresholdCO').textContent=this.value + ' ppm'" />
+                                </div>
+
+                                <div class="slider-item">
+                                    <div class="slider-header">
+                                        <span>CO₂ Indoor Alert Limit</span>
+                                        <strong id="valThresholdCO2">800 ppm</strong>
+                                    </div>
+                                    <input type="range" min="400" max="2000" step="50" value="800" class="range-slider" oninput="document.getElementById('valThresholdCO2').textContent=this.value + ' ppm'" />
+                                </div>
+                            </div>
+
+                            <button class="btn-save-thresholds" onclick="alert('✅ Custom alert thresholds saved successfully!')">
+                                <i class="fas fa-floppy-disk"></i> Save Alert Configuration
+                            </button>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- ============================================== -->
+                <!-- SCREEN 5: ADMIN & IOT DEVICE MANAGEMENT PANEL  -->
+                <!-- ============================================== -->
+                <section class="screen-view" id="screenAdmin">
+                    
+                    <!-- Top Section: Live AQI Showing Panel + Neon Cloud Status -->
+                    <div class="admin-top-grid">
+                        
+                        <!-- 1. Live AQI Showing Hero Panel -->
+                        <div class="card admin-aqi-showing-panel">
+                            <div class="showing-panel-header">
+                                <div class="badge-chip-live"><span class="pulse-dot"></span> LIVE SYSTEM AQI SHOWING PANEL</div>
+                                <div class="showing-clock" id="adminShowingClock"><i class="fas fa-clock"></i> Live Feed Active</div>
+                            </div>
+                            
+                            <div class="showing-panel-body">
+                                <div class="showing-aqi-circle-wrapper">
+                                    <div class="showing-aqi-ring" id="adminAqiRing">
+                                        <div class="showing-aqi-glow" id="adminAqiGlow"></div>
+                                        <span class="showing-aqi-val" id="adminAqiVal">42</span>
+                                        <span class="showing-aqi-unit">AQI INDEX</span>
+                                    </div>
+                                </div>
+                                <div class="showing-aqi-meta">
+                                    <div class="showing-category-tag bg-green-light text-green" id="adminAqiCatTag">
+                                        <i class="fas fa-shield-heart"></i> <span id="adminAqiCatText">Good (Air Safe)</span>
+                                    </div>
+                                    <h3 class="showing-title">Bangalore Regional Pollution Control &amp; Sensing Hub</h3>
+                                    <p class="showing-desc">Real-time composite telemetry dynamically computed from active IoT sensor nodes and Open-Meteo Satellite dual-write feeds.</p>
+                                    
+                                    <div class="showing-action-bar">
+                                        <button class="btn-showing-action primary" onclick="pollLatestReading(); refreshAdminDeviceList();">
+                                            <i class="fas fa-rotate"></i> Refresh Telemetry
+                                        </button>
+                                        <button class="btn-showing-action" onclick="testNeonDbConnection()">
+                                            <i class="fas fa-database text-blue"></i> Ping Neon DB
+                                        </button>
+                                        <button class="btn-showing-action danger" onclick="clearAllData()">
+                                            <i class="fas fa-trash-can"></i> Reset Demo Logs
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AQI EPA Color Ribbon -->
+                            <div class="epa-ribbon-bar">
+                                <div class="epa-seg seg-good active" title="0 - 50: Good">Good (0-50)</div>
+                                <div class="epa-seg seg-mod" title="51 - 100: Moderate">Moderate (51-100)</div>
+                                <div class="epa-seg seg-sens" title="101 - 150: Sensitive">Sensitive (101-150)</div>
+                                <div class="epa-seg seg-unhealthy" title="151 - 200: Unhealthy">Unhealthy (151-200)</div>
+                                <div class="epa-seg seg-hazard" title="201 - 300+: Hazardous">Hazardous (201+)</div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Neon PostgreSQL Cloud DB Telemetry Card -->
+                        <div class="card neon-cloud-telemetry-card">
+                            <div class="neon-card-header">
+                                <div class="neon-brand">
+                                    <i class="fas fa-database text-blue"></i>
+                                    <div>
+                                        <h4>Neon PostgreSQL Cloud</h4>
+                                        <span class="neon-sub">AWS Singapore Serverless Database</span>
+                                    </div>
+                                </div>
+                                <span class="badge-status online" id="neonBadgeStatus">Connected 🟢</span>
+                            </div>
+
+                            <div class="neon-metrics-list">
+                                <div class="neon-metric-row">
+                                    <span class="n-lbl">Connection State</span>
+                                    <strong class="n-val text-green" id="neonStateText">Active &amp; Dual-Writing</strong>
+                                </div>
+                                <div class="neon-metric-row">
+                                    <span class="n-lbl">Cloud DB Host</span>
+                                    <code class="n-code" id="neonHostText">ep-soft-brook-b30hvtau...aws.neon.tech</code>
+                                </div>
+                                <div class="neon-metric-row">
+                                    <span class="n-lbl">Total Logged Readings</span>
+                                    <strong class="n-val text-blue" id="neonTotalReadings">600+ records</strong>
+                                </div>
+                                <div class="neon-metric-row">
+                                    <span class="n-lbl">Query Ping Latency</span>
+                                    <strong class="n-val text-orange" id="neonLatencyText">~14 ms</strong>
+                                </div>
+                                <div class="neon-metric-row">
+                                    <span class="n-lbl">SSL Security Mode</span>
+                                    <span class="tag-chip"><i class="fas fa-lock text-green"></i> TLS 1.3 Require</span>
+                                </div>
+                            </div>
+
+                            <button class="btn-test-db" onclick="testNeonDbConnection()">
+                                <i class="fas fa-bolt"></i> Test Live Cloud Query
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- Middle Section: IoT Device Fleet Management with "Is Active" Option -->
+                    <div class="admin-devices-section">
+                        <div class="section-title-row">
+                            <div>
+                                <h3 class="panel-title"><i class="fas fa-microchip text-green"></i> IoT Hardware Devices &amp; Sensor Node Management</h3>
+                                <span class="panel-subtitle">Individual Node Telemetry: CO₂, CO, Temperature, Humidity with Active Option Control</span>
+                            </div>
+                            <div class="device-actions">
+                                <button class="btn-topbar-action" onclick="refreshAdminDeviceList()">
+                                    <i class="fas fa-arrows-rotate"></i> Refresh Nodes
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic IoT Devices Container (Populated via JS) -->
+                        <div class="devices-grid" id="adminDevicesContainer">
+                            
+                            <!-- Static Initial Device 1 Template -->
+                            <div class="card device-card active-device" id="deviceCard-ESP32-NODE-01">
+                                <div class="device-card-header">
+                                    <div class="device-identity">
+                                        <div class="device-avatar bg-green-light text-green"><i class="fas fa-microchip"></i></div>
+                                        <div>
+                                            <h4 class="device-name">ESP32 Stationary Environmental Station</h4>
+                                            <span class="device-id-chip">ID: ESP32-NODE-01</span>
+                                        </div>
+                                    </div>
+                                    <div class="device-toggle-wrap">
+                                        <span class="toggle-label">Is Active:</span>
+                                        <label class="switch-toggle" title="Toggle IoT Node Active Status">
+                                            <input type="checkbox" checked id="toggle-ESP32-NODE-01" onchange="toggleDeviceActiveStatus('ESP32-NODE-01', this.checked)">
+                                            <span class="slider-round"></span>
+                                        </label>
+                                        <span class="device-status-badge badge-green" id="badge-ESP32-NODE-01">ACTIVE</span>
+                                    </div>
+                                </div>
+
+                                <!-- 4 Separate Dedicated Parameters for this IoT Device -->
+                                <div class="device-sensors-grid">
+                                    <div class="sensor-mini-tile">
+                                        <div class="s-tile-header">
+                                            <span><i class="fas fa-wind text-blue"></i> Carbon Dioxide (CO₂)</span>
+                                            <span class="s-dot dot-green"></span>
+                                        </div>
+                                        <div class="s-tile-val text-blue">
+                                            <span id="devCO2-ESP32-NODE-01">421.0</span> <small>ppm</small>
+                                        </div>
+                                        <div class="s-progress"><div class="s-bar bg-blue" id="devBarCO2-ESP32-NODE-01" style="width: 35%;"></div></div>
+                                        <span class="s-caption">Indoor/Atmospheric</span>
+                                    </div>
+
+                                    <div class="sensor-mini-tile">
+                                        <div class="s-tile-header">
+                                            <span><i class="fas fa-smog text-orange"></i> Carbon Monoxide (CO)</span>
+                                            <span class="s-dot dot-green"></span>
+                                        </div>
+                                        <div class="s-tile-val text-orange">
+                                            <span id="devCO-ESP32-NODE-01">0.8</span> <small>ppm</small>
+                                        </div>
+                                        <div class="s-progress"><div class="s-bar bg-orange" id="devBarCO-ESP32-NODE-01" style="width: 15%;"></div></div>
+                                        <span class="s-caption">Safe &lt; 4.5 ppm</span>
+                                    </div>
+
+                                    <div class="sensor-mini-tile">
+                                        <div class="s-tile-header">
+                                            <span><i class="fas fa-temperature-high text-orange"></i> Temperature</span>
+                                            <span class="s-dot dot-green"></span>
+                                        </div>
+                                        <div class="s-tile-val text-dark">
+                                            <span id="devTemp-ESP32-NODE-01">28.5</span> <small>°C</small>
+                                        </div>
+                                        <div class="s-progress"><div class="s-bar bg-orange" id="devBarTemp-ESP32-NODE-01" style="width: 57%;"></div></div>
+                                        <span class="s-caption">Ambient Climate</span>
+                                    </div>
+
+                                    <div class="sensor-mini-tile">
+                                        <div class="s-tile-header">
+                                            <span><i class="fas fa-droplet text-blue"></i> Relative Humidity</span>
+                                            <span class="s-dot dot-green"></span>
+                                        </div>
+                                        <div class="s-tile-val text-blue">
+                                            <span id="devHum-ESP32-NODE-01">62.0</span> <small>%</small>
+                                        </div>
+                                        <div class="s-progress"><div class="s-bar bg-blue" id="devBarHum-ESP32-NODE-01" style="width: 62%;"></div></div>
+                                        <span class="s-caption">Moisture Balance</span>
+                                    </div>
+                                </div>
+
+                                <div class="device-card-footer">
+                                    <div class="footer-meta-item">
+                                        <i class="fas fa-battery-three-quarters text-green"></i> Battery: <strong>98%</strong>
+                                    </div>
+                                    <div class="footer-meta-item">
+                                        <i class="fas fa-signal text-green"></i> Signal: <strong>-62 dBm</strong>
+                                    </div>
+                                    <div class="footer-meta-item">
+                                        <i class="fas fa-location-dot text-muted"></i> Station 1 (Central Bangalore)
+                                    </div>
+                                    <div class="footer-meta-item">
+                                        <i class="fas fa-clock text-muted"></i> Last Seen: <span id="devLastSeen-ESP32-NODE-01">Just Now</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Static Initial Device 2 Template -->
+                            <div class="card device-card active-device" id="deviceCard-ESP32-NODE-02">
+                                <div class="device-card-header">
+                                    <div class="device-identity">
+                                        <div class="device-avatar bg-blue-light text-blue"><i class="fas fa-satellite-dish"></i></div>
+                                        <div>
+                                            <h4 class="device-name">ESP32 Mobile Rover / Drone Node</h4>
+                                            <span class="device-id-chip">ID: ESP32-NODE-02</span>
+                                        </div>
+                                    </div>
+                                    <div class="device-toggle-wrap">
+                                        <span class="toggle-label">Is Active:</span>
+                                        <label class="switch-toggle" title="Toggle IoT Node Active Status">
+                                            <input type="checkbox" checked id="toggle-ESP32-NODE-02" onchange="toggleDeviceActiveStatus('ESP32-NODE-02', this.checked)">
+                                            <span class="slider-round"></span>
+                                        </label>
+                                        <span class="device-status-badge badge-green" id="badge-ESP32-NODE-02">ACTIVE</span>
+                                    </div>
+                                </div>
+
+                                <!-- 4 Separate Dedicated Parameters for this IoT Device -->
+                                <div class="device-sensors-grid">
+                                    <div class="sensor-mini-tile">
+                                        <div class="s-tile-header">
+                                            <span><i class="fas fa-wind text-blue"></i> Carbon Dioxide (CO₂)</span>
+                                            <span class="s-dot dot-green"></span>
+                                        </div>
+                                        <div class="s-tile-val text-blue">
+                                            <span id="devCO2-ESP32-NODE-02">465.0</span> <small>ppm</small>
+                                        </div>
+                                        <div class="s-progress"><div class="s-bar bg-blue" id="devBarCO2-ESP32-NODE-02" style="width: 42%;"></div></div>
+                                        <span class="s-caption">Industrial Plume</span>
+                                    </div>
+
+                                    <div class="sensor-mini-tile">
+                                        <div class="s-tile-header">
+                                            <span><i class="fas fa-smog text-orange"></i> Carbon Monoxide (CO)</span>
+                                            <span class="s-dot dot-green"></span>
+                                        </div>
+                                        <div class="s-tile-val text-orange">
+                                            <span id="devCO-ESP32-NODE-02">1.2</span> <small>ppm</small>
+                                        </div>
+                                        <div class="s-progress"><div class="s-bar bg-orange" id="devBarCO-ESP32-NODE-02" style="width: 20%;"></div></div>
+                                        <span class="s-caption">Safe &lt; 4.5 ppm</span>
+                                    </div>
+
+                                    <div class="sensor-mini-tile">
+                                        <div class="s-tile-header">
+                                            <span><i class="fas fa-temperature-high text-orange"></i> Temperature</span>
+                                            <span class="s-dot dot-green"></span>
+                                        </div>
+                                        <div class="s-tile-val text-dark">
+                                            <span id="devTemp-ESP32-NODE-02">29.2</span> <small>°C</small>
+                                        </div>
+                                        <div class="s-progress"><div class="s-bar bg-orange" id="devBarTemp-ESP32-NODE-02" style="width: 60%;"></div></div>
+                                        <span class="s-caption">Rover Thermal Log</span>
+                                    </div>
+
+                                    <div class="sensor-mini-tile">
+                                        <div class="s-tile-header">
+                                            <span><i class="fas fa-droplet text-blue"></i> Relative Humidity</span>
+                                            <span class="s-dot dot-green"></span>
+                                        </div>
+                                        <div class="s-tile-val text-blue">
+                                            <span id="devHum-ESP32-NODE-02">58.0</span> <small>%</small>
+                                        </div>
+                                        <div class="s-progress"><div class="s-bar bg-blue" id="devBarHum-ESP32-NODE-02" style="width: 58%;"></div></div>
+                                        <span class="s-caption">Moisture Balance</span>
+                                    </div>
+                                </div>
+
+                                <div class="device-card-footer">
+                                    <div class="footer-meta-item">
+                                        <i class="fas fa-battery-half text-orange"></i> Battery: <strong>85%</strong>
+                                    </div>
+                                    <div class="footer-meta-item">
+                                        <i class="fas fa-signal text-green"></i> Signal: <strong>-70 dBm</strong>
+                                    </div>
+                                    <div class="footer-meta-item">
+                                        <i class="fas fa-location-dot text-muted"></i> Rover 2 (Industrial Zone)
+                                    </div>
+                                    <div class="footer-meta-item">
+                                        <i class="fas fa-clock text-muted"></i> Last Seen: <span id="devLastSeen-ESP32-NODE-02">Just Now</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </section>
+
+                <!-- ============================================== -->
+                <!-- SCREEN 6: SATELLITE PROVIDER (OPEN-METEO)      -->
+                <!-- ============================================== -->
+                <section class="screen-view" id="screenProvider">
+                    <div class="provider-dashboard-grid">
+                        
+                        <div class="card provider-hero-card">
+                            <div class="provider-hero-content">
+                                <div class="provider-badge-row">
+                                    <span class="badge-provider"><i class="fas fa-satellite"></i> LIVE SATELLITE NETWORK</span>
+                                    <span class="badge-status online">Active Feed</span>
+                                </div>
+                                <h2>Open-Meteo Global Air Quality &amp; Weather API</h2>
+                                <p>Integrated live satellite and ground station telemetry providing real-time $CO$, $CO_2$, AQI, Temperature, and Humidity for any global GPS coordinate without quotas or API limits.</p>
+                                
+                                <!-- City Geocoder Sync Form -->
+                                <div class="provider-search-box">
+                                    <input type="text" id="providerCityInput" placeholder="Enter city name (e.g. Bangalore, Delhi, London, Tokyo, New York)..." onkeydown="if(event.key==='Enter') searchAndSyncProviderCity()" />
+                                    <button class="btn-provider-sync" onclick="searchAndSyncProviderCity()">
+                                        <i class="fas fa-cloud-arrow-down"></i> Sync City Telemetry
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live Satellite Telemetry Comparison -->
+                        <div class="card provider-telemetry-card">
+                            <h4 class="panel-title"><i class="fas fa-tower-cell text-green"></i> Live Synced Provider Data</h4>
+                            <div class="provider-data-grid">
+                                <div class="p-data-box">
+                                    <span class="p-lbl">Provider Source</span>
+                                    <strong class="p-val" id="provName">Open-Meteo Satellite</strong>
+                                </div>
+                                <div class="p-data-box">
+                                    <span class="p-lbl">Active GPS Coordinates</span>
+                                    <strong class="p-val" id="provCoords">12.9716, 77.5946</strong>
+                                </div>
+                                <div class="p-data-box">
+                                    <span class="p-lbl">Reported US AQI</span>
+                                    <strong class="p-val text-green" id="provAqi">52 (Moderate)</strong>
+                                </div>
+                                <div class="p-data-box">
+                                    <span class="p-lbl">Carbon Monoxide (CO)</span>
+                                    <strong class="p-val text-orange" id="provCO">0.65 ppm</strong>
+                                </div>
+                                <div class="p-data-box">
+                                    <span class="p-lbl">Estimated CO₂ Baseline</span>
+                                    <strong class="p-val text-blue" id="provCO2">441.6 ppm</strong>
+                                </div>
+                                <div class="p-data-box">
+                                    <span class="p-lbl">Satellite Weather</span>
+                                    <strong class="p-val text-dark" id="provWeather">21.1°C • 96% Humidity</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- ============================================== -->
+                <!-- SCREEN 6: DEVICE & CLOUD HUB (PROFILE)         -->
+                <!-- ============================================== -->
+                <section class="screen-view" id="screenProfile">
+                    <div class="profile-layout-grid">
+                        
+                        <!-- Profile Card -->
+                        <div class="card profile-info-card">
+                            <img src="img/logo.png" alt="EcoMonitor Logo" class="profile-avatar-large" />
+                            <h3 class="profile-title">Girish Naik</h3>
+                            <span class="profile-designation">EcoPulse Environmental Guard Lead</span>
+                            <div class="profile-tags">
+                                <span class="tag-chip">System Administrator</span>
+                                <span class="tag-chip">IoT Node 01</span>
+                            </div>
+                        </div>
+
+                        <!-- System Architecture Details -->
+                        <div class="card system-details-card">
+                            <h4 class="panel-title"><i class="fas fa-network-wired text-green"></i> Connected System Architecture</h4>
+                            
+                            <div class="system-item-row">
+                                <div class="sys-icon bg-green-light"><i class="fas fa-microchip text-green"></i></div>
+                                <div class="sys-info">
+                                    <h5>ESP32 Multi-Sensor Unit</h5>
+                                    <p>MQ-7 (CO), MQ-135 (CO₂), DHT22 (Temp &amp; Hum), Neo-6M GPS</p>
+                                </div>
+                                <span class="badge-status online">Hardware Ready</span>
+                            </div>
+
+                            <div class="system-item-row">
+                                <div class="sys-icon bg-blue-light"><i class="fas fa-database text-blue"></i></div>
+                                <div class="sys-info">
+                                    <h5>Neon PostgreSQL Cloud DB</h5>
+                                    <p>AWS Cloud Singapore Serverless Dual-Write Pooler</p>
+                                </div>
+                                <span class="badge-status online">Cloud Connected</span>
+                            </div>
+
+                            <div class="system-item-row">
+                                <div class="sys-icon bg-orange-light"><i class="fas fa-wifi text-orange"></i></div>
+                                <div class="sys-info">
+                                    <h5>Local Wi-Fi Host Server</h5>
+                                    <p id="profileServerIp">10.129.199.144:8000</p>
+                                </div>
+                                <span class="badge-status online">Port 8000 Open</span>
+                            </div>
+
+                            <div class="system-item-row">
+                                <div class="sys-icon bg-green-light"><i class="fas fa-mobile-screen-button text-green"></i></div>
+                                <div class="sys-info">
+                                    <h5>EcoPulse Android Application</h5>
+                                    <p>Standalone compiled APK installer with real-time background sync</p>
+                                </div>
+                                <a href="EcoPulse_Pollution_Monitor.apk" class="btn-download-apk-link" download>
+                                    <i class="fas fa-download"></i> Get APK
+                                </a>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Application JavaScript -->
+    <script src="js/app.js"></script>
+</body>
+</html>
