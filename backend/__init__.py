@@ -1,1 +1,0 @@
-# EcoPulse Backend Package
