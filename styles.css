@@ -1020,17 +1020,65 @@ body.dashboard-body {
     background: var(--accent-mint);
 }
 
+.quick-city-chips {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    width: 100%;
+    padding: 6px 0 2px 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.quick-chips-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #1F2937;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.city-chip {
+    padding: 5px 12px;
+    border-radius: 16px;
+    background: #F3F4F6;
+    border: 1px solid #E5E7EB;
+    font-family: var(--font-main);
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #1F2937;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.city-chip:hover,
+.city-chip.active {
+    background: #E8F5E9;
+    color: #1B5E20;
+    border-color: #A7F3D0;
+    transform: translateY(-1px);
+}
+
 .leaflet-full-container {
     flex: 1;
+    min-height: 520px;
+    height: calc(100vh - 240px);
     border-radius: var(--radius-lg);
     overflow: hidden;
     position: relative;
-    border: 1px solid var(--card-border);
+    border: 1.5px solid var(--card-border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
 #leafletMap {
     width: 100%;
     height: 100%;
+    min-height: 500px;
+    background: #E5E7EB;
+    z-index: 1;
 }
 
 .floating-station-panel {
@@ -2568,6 +2616,231 @@ input:checked + .slider-round:before {
     transform: translateY(-1px);
 }
 
+/* Topbar APK Quick Download Button */
+.btn-topbar-apk {
+    background: linear-gradient(135deg, #1B5E20, #2D6A4F);
+    color: #FFFFFF;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(45, 106, 79, 0.28);
+}
+
+.btn-topbar-apk:hover {
+    background: linear-gradient(135deg, #2D6A4F, #52B788);
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 16px rgba(45, 106, 79, 0.38);
+}
+
+/* APK Distribution Hub Card (Profile Screen) */
+.apk-distribution-hero {
+    background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+    border: 1.5px solid #86EFAC;
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 20px;
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.12);
+}
+
+.apk-hero-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.apk-hero-title-box {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.apk-hero-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: #15803D;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
+}
+
+.apk-hero-info h4 {
+    font-size: 17px;
+    font-weight: 800;
+    color: #14532D;
+    margin: 0 0 4px 0;
+}
+
+.apk-hero-info p {
+    font-size: 12.5px;
+    color: #166534;
+    margin: 0;
+    font-weight: 500;
+}
+
+.apk-action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.apk-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    border: none;
+    text-align: center;
+}
+
+.apk-btn-download {
+    background: #16A34A;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
+}
+
+.apk-btn-download:hover {
+    background: #15803D;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(22, 163, 74, 0.4);
+}
+
+.apk-btn-whatsapp {
+    background: #25D366;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+}
+
+.apk-btn-whatsapp:hover {
+    background: #1EBE5D;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(37, 211, 102, 0.4);
+}
+
+.apk-btn-qr {
+    background: #FFFFFF;
+    color: #1F2937;
+    border: 1.5px solid #D1D5DB;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.apk-btn-qr:hover {
+    background: #F9FAFB;
+    border-color: #9CA3AF;
+    transform: translateY(-2px);
+}
+
+.apk-btn-copy {
+    background: #FFFFFF;
+    color: #0369A1;
+    border: 1.5px solid #BAE6FD;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.apk-btn-copy:hover {
+    background: #F0F9FF;
+    transform: translateY(-2px);
+}
+
+/* Modal Popup Styles */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(5px);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-card {
+    background: #FFFFFF;
+    border-radius: 24px;
+    max-width: 500px;
+    width: 100%;
+    padding: 28px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+    position: relative;
+    animation: modalPop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPop {
+    from { transform: scale(0.92) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: #F3F4F6;
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: #6B7280;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+    background: #E5E7EB;
+    color: #111827;
+}
+
+.qr-preview-box {
+    background: #F9FAFB;
+    border: 2px dashed #E5E7EB;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 18px 0;
+}
+
+.qr-code-img {
+    width: 170px;
+    height: 170px;
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
 /* Phone App Frame Mode (APK / Smartphone Compatible Size on Web) */
 body.phone-mode-active {
     background: #0d1b13;
@@ -2649,27 +2922,302 @@ body.phone-mode-active .mobile-bottom-nav {
     box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
 }
 
+/* ==================================================== */
+/* 19. ADVANCED MOBILE & TOUCH RESPONSIVE STYLES        */
+/* ==================================================== */
+html, body {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+}
+
+.web-layout {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+.main-wrapper {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.content-canvas {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
 /* Native Mobile Bottom Navigation Bar */
 .mobile-bottom-nav {
     display: none;
 }
 
 @media (max-width: 992px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        z-index: 10000;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .main-wrapper {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    .mobile-menu-btn {
+        display: flex !important;
+    }
+
     .mobile-bottom-nav {
         display: flex;
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        background: #FFFFFF;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         border-top: 1px solid var(--card-border);
-        padding: 8px 4px;
+        padding: 6px 4px;
+        padding-bottom: max(6px, env(safe-area-inset-bottom));
         justify-content: space-around;
         z-index: 9999;
-        box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
     }
+
     .content-canvas {
-        padding-bottom: 85px !important;
+        padding: 16px !important;
+        padding-bottom: 95px !important;
+    }
+
+    .topbar {
+        padding: 12px 16px;
+    }
+
+    .dashboard-layout-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px;
+    }
+
+    .metric-ribbon-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px;
+    }
+
+    .metric-hero-card {
+        grid-column: span 2 !important;
+    }
+
+    .history-kpi-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px;
+    }
+
+    .analytics-charts-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .analytics-charts-grid .chart-box-card:first-child {
+        grid-column: span 1 !important;
+    }
+
+    .alerts-layout-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .admin-layout-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .map-layout-box {
+        height: auto;
+        min-height: calc(100vh - 180px);
+    }
+
+    .leaflet-full-container {
+        height: 55vh;
+        min-height: 380px;
+    }
+}
+
+@media (max-width: 680px) {
+    .topbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 10px 14px;
+    }
+
+    .topbar-left {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .page-title {
+        font-size: 16px !important;
+    }
+
+    .page-subtitle {
+        font-size: 11px !important;
+    }
+
+    .topbar-right {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .topbar-chip {
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+
+    .btn-topbar-apk,
+    .btn-device-toggle,
+    .btn-topbar-action {
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+
+    .metric-ribbon-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px;
+    }
+
+    .metric-hero-card {
+        padding: 16px;
+    }
+
+    .aqi-circular-gauge-wrapper {
+        width: 140px;
+        height: 140px;
+    }
+
+    .gauge-center-content .val-hero {
+        font-size: 34px;
+    }
+
+    .metric-sub-card {
+        padding: 12px;
+    }
+
+    .metric-sub-card .val-sub {
+        font-size: 20px;
+    }
+
+    .history-filter-ribbon {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 14px;
+    }
+
+    .filter-ribbon-left {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .filter-ribbon-right {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .btn-export-action {
+        justify-content: center;
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .history-kpi-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px;
+    }
+
+    .kpi-card {
+        padding: 14px;
+    }
+
+    .kpi-val {
+        font-size: 20px;
+    }
+
+    .map-control-bar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .map-search-group {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .map-filter-group {
+        overflow-x: auto;
+        padding-bottom: 4px;
+        width: 100%;
+    }
+
+    .btn-gps-locate {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .floating-station-panel {
+        left: 8px !important;
+        right: 8px !important;
+        bottom: 85px !important;
+        padding: 12px;
+        max-width: 100% !important;
+    }
+
+    .floating-panel-metrics {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px;
+    }
+
+    .panel-metric-col .pm-val {
+        font-size: 13px;
+    }
+
+    .modal-card {
+        padding: 20px 14px;
+        border-radius: 18px;
+    }
+
+    .qr-preview-box {
+        padding: 12px;
+        margin: 12px 0;
+    }
+
+    .qr-code-img {
+        width: 150px;
+        height: 150px;
+    }
+
+    .apk-action-grid {
+        grid-template-columns: 1fr !important;
     }
 }
 
@@ -2688,6 +3236,7 @@ body.phone-mode-active .mobile-bottom-nav {
     padding: 4px 8px;
     border-radius: 8px;
     transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .mob-nav-item i {
@@ -2698,6 +3247,110 @@ body.phone-mode-active .mobile-bottom-nav {
 .mob-nav-item:hover {
     color: #1B5E20;
     background: #E8F5E9;
+}
+
+/* ==================================================== */
+/* 20. PRINT & PDF REPORT GENERATION STYLES             */
+/* ==================================================== */
+@media print {
+    *, *::before, *::after {
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    body {
+        background: #FFFFFF !important;
+        color: #1A1A1A !important;
+        font-size: 12pt !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Hide Navigation, Topbar Buttons, Sidebars, Popups, Action Buttons */
+    .sidebar,
+    .mobile-bottom-nav,
+    .topbar-right,
+    .sidebar-toggle,
+    .btn-export-action,
+    .interval-selector,
+    .date-picker-box input,
+    .floating-sheet,
+    .phone-simulator-frame,
+    #sidebarToggle,
+    .device-mode-toggle,
+    .btn-map-search,
+    .leaflet-control-container,
+    .badge-status {
+        display: none !important;
+    }
+
+    .app-layout {
+        display: block !important;
+    }
+
+    .main-wrapper {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    .topbar {
+        position: static !important;
+        border-bottom: 2px solid #2D6A4F !important;
+        padding: 10px 0 !important;
+        margin-bottom: 20px !important;
+    }
+
+    .content-canvas {
+        padding: 0 !important;
+    }
+
+    /* Ensure active screen is visible and styled cleanly */
+    .screen-view {
+        display: none !important;
+    }
+
+    .screen-view.active,
+    #screenHistory,
+    #screenDashboard {
+        display: block !important;
+        page-break-inside: avoid;
+    }
+
+    .card {
+        border: 1px solid #D0D0D0 !important;
+        background: #FFFFFF !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+        margin-bottom: 16px !important;
+    }
+
+    .history-kpi-grid,
+    .metric-ribbon-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 12px !important;
+        margin-bottom: 20px !important;
+    }
+
+    .analytics-charts-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 16px !important;
+    }
+
+    .chart-box-card {
+        page-break-inside: avoid !important;
+        margin-bottom: 16px !important;
+    }
+
+    .chart-canvas-wrapper {
+        height: 200px !important;
+    }
+
+    canvas {
+        max-width: 100% !important;
+        height: auto !important;
+    }
 }
 
 

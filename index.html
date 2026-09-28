@@ -141,6 +141,12 @@
                         <span id="lblDeviceToggle">📱 Phone App View</span>
                     </button>
 
+                    <!-- Direct APK Download & Sharing Modal Button -->
+                    <button class="btn-topbar-apk" onclick="openApkHubModal()" title="Download Android App APK & Share on WhatsApp">
+                        <i class="fab fa-android"></i>
+                        <span>Get App (APK)</span>
+                    </button>
+
                     <!-- Quick Sync Satellite Button -->
                     <button class="btn-topbar-action" onclick="syncLiveProvider()" title="Sync Open-Meteo Satellite Data">
                         <i class="fas fa-satellite-dish"></i>
@@ -390,6 +396,18 @@
                                 <button class="map-layer-btn active" onclick="setMapLayerFilter('AQI', this)">Total AQI</button>
                                 <button class="map-layer-btn" onclick="setMapLayerFilter('CO', this)">Carbon Monoxide (CO)</button>
                                 <button class="map-layer-btn" onclick="setMapLayerFilter('CO2', this)">Carbon Dioxide (CO₂)</button>
+                            </div>
+
+                            <div class="quick-city-chips">
+                                <span class="quick-chips-label"><i class="fas fa-bolt text-green"></i> Quick City:</span>
+                                <button class="city-chip active" onclick="quickSelectCity('davangere')">📍 Davangere</button>
+                                <button class="city-chip" onclick="quickSelectCity('bangalore')">📍 Bengaluru</button>
+                                <button class="city-chip" onclick="quickSelectCity('mysore')">📍 Mysuru</button>
+                                <button class="city-chip" onclick="quickSelectCity('delhi')">📍 New Delhi</button>
+                                <button class="city-chip" onclick="quickSelectCity('mumbai')">📍 Mumbai</button>
+                                <button class="city-chip" onclick="quickSelectCity('chennai')">📍 Chennai</button>
+                                <button class="city-chip" onclick="quickSelectCity('hyderabad')">📍 Hyderabad</button>
+                                <button class="city-chip" onclick="quickSelectCity('london')">📍 London</button>
                             </div>
 
                             <button class="btn-gps-locate" onclick="centerUserLocation()" title="Locate My GPS Coordinates">
@@ -1138,16 +1156,45 @@
                             </div>
 
                             <div class="system-item-row">
-                                <div class="sys-icon bg-green-light"><i class="fas fa-mobile-screen-button text-green"></i></div>
+                                <div class="sys-icon bg-green-light"><i class="fab fa-android text-green"></i></div>
                                 <div class="sys-info">
-                                    <h5>EcoPulse Android Application</h5>
-                                    <p>Standalone compiled APK installer with real-time background sync</p>
+                                    <h5>EcoPulse Android Application (v2.4 Release)</h5>
+                                    <p>Official compiled APK installer (7.8 MB) with live background sync</p>
                                 </div>
-                                <a href="EcoPulse_Pollution_Monitor.apk" class="btn-download-apk-link" download>
-                                    <i class="fas fa-download"></i> Get APK
-                                </a>
+                                <button class="btn-download-apk-link" onclick="openApkHubModal()" style="border:none; cursor:pointer;">
+                                    <i class="fas fa-download"></i> Download &amp; Share
+                                </button>
                             </div>
 
+                        </div>
+
+                        <!-- Dedicated Android APK Distribution & WhatsApp Hub -->
+                        <div class="apk-distribution-hero">
+                            <div class="apk-hero-header">
+                                <div class="apk-hero-title-box">
+                                    <div class="apk-hero-icon"><i class="fab fa-android"></i></div>
+                                    <div class="apk-hero-info">
+                                        <h4>EcoPulse Android Mobile App (Official APK)</h4>
+                                        <p>Install directly on any Android smartphone, tablet, or field monitor</p>
+                                    </div>
+                                </div>
+                                <span class="badge-status online" style="font-size:12px;"><i class="fas fa-circle-check"></i> v2.4 APK Ready (7.8 MB)</span>
+                            </div>
+
+                            <div class="apk-action-grid">
+                                <a href="EcoPulse_Pollution_Monitor.apk" class="apk-btn apk-btn-download" download="EcoPulse_Pollution_Monitor.apk">
+                                    <i class="fas fa-download"></i> Direct Download APK
+                                </a>
+                                <button class="apk-btn apk-btn-whatsapp" onclick="shareApkWhatsApp()">
+                                    <i class="fab fa-whatsapp"></i> Share on WhatsApp
+                                </button>
+                                <button class="apk-btn apk-btn-qr" onclick="openApkHubModal()">
+                                    <i class="fas fa-qrcode"></i> Scan QR Code
+                                </button>
+                                <button class="apk-btn apk-btn-copy" onclick="copyApkLink()">
+                                    <i class="fas fa-link"></i> Copy Link
+                                </button>
+                            </div>
                         </div>
 
                     </div>
@@ -1184,6 +1231,46 @@
             <span>Profile</span>
         </button>
     </nav>
+
+    <!-- Interactive APK Download & Mobile Sharing Hub Modal -->
+    <div class="modal-overlay" id="apkHubModal" onclick="if(event.target===this) closeApkHubModal();">
+        <div class="modal-card">
+            <button class="modal-close-btn" onclick="closeApkHubModal()" title="Close">&times;</button>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+                <div style="width:42px;height:42px;background:#E8F5E9;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#1B5E20;font-size:22px;">
+                    <i class="fab fa-android"></i>
+                </div>
+                <div>
+                    <h3 style="margin:0;font-size:18px;font-weight:800;color:#111827;">Download EcoPulse Mobile App</h3>
+                    <p style="margin:2px 0 0 0;font-size:12px;color:#6B7280;">Android 8.0+ • Standalone APK (7.8 MB)</p>
+                </div>
+            </div>
+
+            <!-- QR Code Box -->
+            <div class="qr-preview-box">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=EcoPulse_Pollution_Monitor.apk" alt="Scan QR Code to Download" class="qr-code-img" id="modalQrImage" />
+                <span style="font-size:12px;font-weight:700;color:#374151;margin-top:10px;">📲 Scan with Phone Camera to Install APK</span>
+            </div>
+
+            <!-- Copy Link Row -->
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+                <input type="text" id="modalApkUrlInput" readonly style="flex:1;padding:10px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:12px;color:#374151;background:#F9FAFB;outline:none;" />
+                <button class="apk-btn apk-btn-copy" onclick="copyApkLink()" style="padding:10px 16px;white-space:nowrap;">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+
+            <!-- Action Buttons Grid -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <a href="EcoPulse_Pollution_Monitor.apk" class="apk-btn apk-btn-download" download="EcoPulse_Pollution_Monitor.apk">
+                    <i class="fas fa-download"></i> Direct Download
+                </a>
+                <button class="apk-btn apk-btn-whatsapp" onclick="shareApkWhatsApp()">
+                    <i class="fab fa-whatsapp"></i> WhatsApp Share
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Application JavaScript -->
     <script src="js/app.js"></script>
